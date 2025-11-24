@@ -83,14 +83,28 @@ func (d *Database) GetScanJob(jobID uuid.UUID) (*models.ScanJob, error) {
 }
 
 func (d *Database) UpdateScanJobStatus(jobID uuid.UUID, status string, progress int, errorMsg *string) error {
-	query := `
-		UPDATE scan_jobs 
-		SET status = $1, progress = $2, error_message = $3,
-		    started_at = CASE WHEN status = 'queued' AND $1 = 'running' THEN NOW() ELSE started_at END,
-		    completed_at = CASE WHEN $1 IN ('completed', 'failed', 'cancelled') THEN NOW() ELSE completed_at END
-		WHERE id = $4`
+	var query string
+	var args []interface{}
 
-	_, err := d.DB.Exec(query, status, progress, errorMsg, jobID)
+	if errorMsg != nil {
+		query = `
+			UPDATE scan_jobs
+			SET status = $1, progress = $2, error_message = $3,
+				started_at = CASE WHEN status = 'queued' AND $1 = 'running' THEN NOW() ELSE started_at END,
+				completed_at = CASE WHEN $1 IN ('completed', 'failed', 'cancelled') THEN NOW() ELSE completed_at END
+			WHERE id = $4`
+		args = []interface{}{status, progress, *errorMsg, jobID}
+	} else {
+		query = `
+			UPDATE scan_jobs
+			SET status = $1, progress = $2, error_message = NULL,
+				started_at = CASE WHEN status = 'queued' AND $1 = 'running' THEN NOW() ELSE started_at END,
+				completed_at = CASE WHEN $1 IN ('completed', 'failed', 'cancelled') THEN NOW() ELSE completed_at END
+			WHERE id = $3`
+		args = []interface{}{status, progress, jobID}
+	}
+
+	_, err := d.DB.Exec(query, args...)
 	return err
 }
 
