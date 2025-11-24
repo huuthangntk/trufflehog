@@ -33,8 +33,8 @@ This fork extends the original TruffleHog with:
 - ✅ **PostgreSQL Storage** for results
 - ✅ **851 Total Detectors** (9 custom + 842 built-in)
 
-**🔗 Live Demo:** [https://truffle.betkido.com](https://truffle.betkido.com)  
-**📚 API Docs:** [https://truffle.betkido.com/swagger/](https://truffle.betkido.com/swagger/)
+**🔗 Live Demo:** Deploy your own instance with Docker  
+**📚 API Docs:** Available at `/swagger/` when running
 
 ---
 
@@ -63,19 +63,19 @@ TruffleHog scans for secrets in:
 
 ```bash
 # 1. Login to get JWT token
-TOKEN=$(curl -s -X POST https://truffle.betkido.com/api/v1/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"admin123"}' | jq -r '.token')
 
 # 2. Create a scan job
-JOB=$(curl -s -X POST https://truffle.betkido.com/api/v1/scan \
+JOB=$(curl -s -X POST http://localhost:8080/api/v1/scan \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"repo_url":"https://github.com/user/repo"}')
 
 # 3. Check scan status
 JOB_ID=$(echo $JOB | jq -r '.job_id')
-curl -s https://truffle.betkido.com/api/v1/scan/$JOB_ID \
+curl -s http://localhost:8080/api/v1/scan/$JOB_ID \
   -H "Authorization: Bearer $TOKEN" | jq .
 ```
 
@@ -96,7 +96,7 @@ curl -s https://truffle.betkido.com/api/v1/scan/$JOB_ID \
 - `POST /api/v1/webhooks` - Create webhook
 - `GET /api/v1/webhooks` - List webhooks
 
-**📖 Full API Documentation:** See [README_API.md](README_API.md) or visit [https://truffle.betkido.com/swagger/](https://truffle.betkido.com/swagger/)
+**📖 Full API Documentation:** See [README_API.md](README_API.md) or visit `/swagger/` when running
 
 ---
 
@@ -196,7 +196,7 @@ trufflehog docker --image trufflesecurity/secrets
 ```javascript
 const axios = require('axios');
 
-const API_BASE = 'https://truffle.betkido.com';
+const API_BASE = 'http://localhost:8080';
 
 // Login
 const loginResponse = await axios.post(`${API_BASE}/api/v1/auth/login`, {
@@ -233,7 +233,7 @@ console.log('Scan status:', statusResponse.data);
 ```python
 import requests
 
-API_BASE = 'https://truffle.betkido.com'
+API_BASE = 'http://localhost:8080'
 
 # Login
 login_response = requests.post(
@@ -285,7 +285,7 @@ This fork includes 9 additional custom AI service detectors:
 trufflehog dev
 
 # Via API
-curl https://truffle.betkido.com/api/v1/detectors | jq '.detectors[] | select(.name | contains("exa"))'
+curl http://localhost:8080/api/v1/detectors | jq '.detectors[] | select(.name | contains("exa"))'
 ```
 
 ---
@@ -395,8 +395,7 @@ Install: `pre-commit install`
 ## Documentation
 
 - **API Documentation:** [README_API.md](README_API.md)
-- **Deployment Guide:** [DEPLOYMENT_COMPLETE.md](DEPLOYMENT_COMPLETE.md)
-- **Interactive API Docs:** [https://truffle.betkido.com/swagger/](https://truffle.betkido.com/swagger/)
+- **Interactive API Docs:** Available at `/swagger/` when running the API
 - **Original TruffleHog Docs:** [https://github.com/trufflesecurity/trufflehog](https://github.com/trufflesecurity/trufflehog)
 
 ---
@@ -463,7 +462,7 @@ This project is licensed under the **AGPL-3.0 License** - see the [LICENSE](LICE
 
 - **Issues:** [GitHub Issues](https://github.com/huuthangntk/trufflehog/issues)
 - **Discussions:** [GitHub Discussions](https://github.com/trufflesecurity/trufflehog/discussions)
-- **API Support:** Check [Swagger Documentation](https://truffle.betkido.com/swagger/)
+- **API Support:** Check the `/swagger/` endpoint when running the API
 
 ---
 
