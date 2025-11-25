@@ -14,11 +14,12 @@ type Database struct {
 }
 
 func NewDatabase() (*Database, error) {
-	host := getEnv("POSTGRES_HOST", "localhost")
+	// Use GitScout's PostgreSQL database (shared database)
+	host := getEnv("POSTGRES_HOST", "postgres")
 	port := getEnv("POSTGRES_PORT", "5432")
-	user := getEnv("POSTGRES_USER", "trufflehog")
-	password := getEnv("POSTGRES_PASSWORD", "trufflehog_secure_password_2024")
-	dbname := getEnv("POSTGRES_DB", "trufflehog")
+	user := getEnv("POSTGRES_USER", "gitscout")
+	password := getEnv("POSTGRES_PASSWORD", "gitscout_secure_password")
+	dbname := getEnv("POSTGRES_DB", "gitscout")
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)

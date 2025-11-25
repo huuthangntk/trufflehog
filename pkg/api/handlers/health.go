@@ -13,10 +13,10 @@ import (
 
 type HealthHandler struct {
 	database *db.Database
-	queue    *queue.RedisQueue
+	queue    *queue.RabbitMQQueue
 }
 
-func NewHealthHandler(database *db.Database, queue *queue.RedisQueue) *HealthHandler {
+func NewHealthHandler(database *db.Database, queue *queue.RabbitMQQueue) *HealthHandler {
 	return &HealthHandler{
 		database: database,
 		queue:    queue,
@@ -43,11 +43,11 @@ func (h *HealthHandler) Health(c *fiber.Ctx) error {
 		services["database"] = "healthy"
 	}
 
-	// Check Redis
+	// Check RabbitMQ
 	if _, err := h.queue.GetQueueLength(ctx, queue.ScanJobQueue); err != nil {
-		services["redis"] = "unhealthy: " + err.Error()
+		services["rabbitmq"] = "unhealthy: " + err.Error()
 	} else {
-		services["redis"] = "healthy"
+		services["rabbitmq"] = "healthy"
 	}
 
 	// Determine overall status

@@ -90,16 +90,16 @@ func (d *Database) UpdateScanJobStatus(jobID uuid.UUID, status string, progress 
 		query = `
 			UPDATE scan_jobs
 			SET status = $1, progress = $2, error_message = $3,
-				started_at = CASE WHEN status = 'queued' AND $1 = 'running' THEN NOW() ELSE started_at END,
-				completed_at = CASE WHEN $1 IN ('completed', 'failed', 'cancelled') THEN NOW() ELSE completed_at END
+				started_at = CASE WHEN status = 'queued' AND $1::varchar = 'running' THEN NOW() ELSE started_at END,
+				completed_at = CASE WHEN $1::varchar IN ('completed', 'failed', 'cancelled') THEN NOW() ELSE completed_at END
 			WHERE id = $4`
 		args = []interface{}{status, progress, *errorMsg, jobID}
 	} else {
 		query = `
 			UPDATE scan_jobs
 			SET status = $1, progress = $2, error_message = NULL,
-				started_at = CASE WHEN status = 'queued' AND $1 = 'running' THEN NOW() ELSE started_at END,
-				completed_at = CASE WHEN $1 IN ('completed', 'failed', 'cancelled') THEN NOW() ELSE completed_at END
+				started_at = CASE WHEN status = 'queued' AND $1::varchar = 'running' THEN NOW() ELSE started_at END,
+				completed_at = CASE WHEN $1::varchar IN ('completed', 'failed', 'cancelled') THEN NOW() ELSE completed_at END
 			WHERE id = $3`
 		args = []interface{}{status, progress, jobID}
 	}
@@ -473,4 +473,3 @@ func (d *Database) GetActiveWebhooksForEvent(event string) ([]*models.WebhookCon
 
 	return webhooks, rows.Err()
 }
-

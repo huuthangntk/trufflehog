@@ -15,10 +15,10 @@ import (
 
 type ScanHandler struct {
 	database *db.Database
-	queue    *queue.RedisQueue
+	queue    *queue.RabbitMQQueue
 }
 
-func NewScanHandler(database *db.Database, queue *queue.RedisQueue) *ScanHandler {
+func NewScanHandler(database *db.Database, queue *queue.RabbitMQQueue) *ScanHandler {
 	return &ScanHandler{
 		database: database,
 		queue:    queue,
@@ -94,8 +94,7 @@ func (h *ScanHandler) CreateScan(c *fiber.Ctx) error {
 		})
 	}
 
-	// Set initial status in Redis
-	h.queue.SetJobStatus(ctx, job.ID, "queued", 24*time.Hour)
+	// Status is now tracked in the database, no need for separate Redis storage
 
 	return c.Status(fiber.StatusAccepted).JSON(models.ScanJobResponse{
 		JobID:   job.ID.String(),
@@ -252,8 +251,7 @@ func (h *ScanHandler) CancelScan(c *fiber.Ctx) error {
 		})
 	}
 
-	ctx := context.Background()
-	h.queue.SetJobStatus(ctx, jobID, "cancelled", 24*time.Hour)
+	// Status is now tracked in the database, no need for separate Redis storage
 
 	return c.JSON(models.SuccessResponse{
 		Success: true,

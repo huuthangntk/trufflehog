@@ -39,7 +39,7 @@ import (
 type Server struct {
 	app         *fiber.App
 	database    *db.Database
-	queue       *queue.RedisQueue
+	queue       *queue.RabbitMQQueue
 	webhookMgr  *webhooks.WebhookManager
 	workerPool  *queue.WorkerPool
 	port        string
@@ -52,10 +52,10 @@ func NewServer() (*Server, error) {
 		return nil, fmt.Errorf("failed to initialize database: %w", err)
 	}
 
-	// Initialize Redis queue
-	redisQueue, err := queue.NewRedisQueue()
+	// Initialize RabbitMQ queue
+	rabbitQueue, err := queue.NewRabbitMQQueue()
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize Redis queue: %w", err)
+		return nil, fmt.Errorf("failed to initialize RabbitMQ queue: %w", err)
 	}
 
 	// Initialize webhook manager
@@ -80,7 +80,7 @@ func NewServer() (*Server, error) {
 	server := &Server{
 		app:        app,
 		database:   database,
-		queue:      redisQueue,
+		queue:      rabbitQueue,
 		webhookMgr: webhookMgr,
 		port:       port,
 	}
@@ -93,7 +93,7 @@ func NewServer() (*Server, error) {
 	if val := os.Getenv("API_WORKERS"); val != "" {
 		fmt.Sscanf(val, "%d", &numWorkers)
 	}
-	server.workerPool = queue.NewWorkerPool(numWorkers, redisQueue, database, webhookMgr)
+	server.workerPool = queue.NewWorkerPool(numWorkers, rabbitQueue, database, webhookMgr)
 
 	return server, nil
 }
@@ -106,14 +106,10 @@ func (s *Server) setupRoutes() {
 	// API v1 routes
 	api := s.app.Group("/api/v1")
 
-	// Auth routes (public)
-	authHandler := handlers.NewAuthHandler(s.database)
-	api.Post("/auth/login", authHandler.Login)
-	api.Post("/auth/register", authHandler.Register)
+	// Authentication removed - using GitScout's auth system
 
-	// Protected routes (require JWT)
+	// Routes (no authentication required - using GitScout's auth system)
 	protected := api.Group("/")
-	protected.Use(middleware.JWTAuth)
 
 	// Scan routes
 	scanHandler := handlers.NewScanHandler(s.database, s.queue)
