@@ -255,6 +255,7 @@ import (
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/elasticemail"
 	elevenlabsv1 "github.com/trufflesecurity/trufflehog/v3/pkg/detectors/elevenlabs/v1"
 	elevenlabsv2 "github.com/trufflesecurity/trufflehog/v3/pkg/detectors/elevenlabs/v2"
+	elevenlabsv3 "github.com/trufflesecurity/trufflehog/v3/pkg/detectors/elevenlabs/v3"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/enablex"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/endorlabs"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/enigma"
@@ -264,6 +265,7 @@ import (
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/ethplorer"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/eventbrite"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/everhour"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/exa"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/exchangerateapi"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/exchangeratesapi"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/exportsdk"
@@ -282,6 +284,7 @@ import (
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/financialmodelingprep"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/findl"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/finnhub"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/firecrawl"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/fixerio"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/flatio"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/fleetbase"
@@ -520,6 +523,7 @@ import (
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/oopspam"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/openai"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/opencagedata"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/openrouter"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/openuv"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/openvpn"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/openweather"
@@ -549,6 +553,7 @@ import (
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/peopledatalabs"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/pepipost"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/percy"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/perplexity"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/photoroom"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/phraseaccesstoken"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/pinata"
@@ -624,6 +629,7 @@ import (
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/rownd"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/rubygems"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/runrunit"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/runwayml"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/saladcloudapikey"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/salesblink"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/salescookie"
@@ -1123,6 +1129,7 @@ func buildDetectorList() []detectors.Detector {
 		&elasticemail.Scanner{},
 		&elevenlabsv1.Scanner{},
 		&elevenlabsv2.Scanner{},
+		&elevenlabsv3.Scanner{},
 		&enablex.Scanner{},
 		&endorlabs.Scanner{},
 		&enigma.Scanner{},
@@ -1132,6 +1139,7 @@ func buildDetectorList() []detectors.Detector {
 		&ethplorer.Scanner{},
 		&eventbrite.Scanner{},
 		&everhour.Scanner{},
+		&exa.Scanner{},
 		&exchangerateapi.Scanner{},
 		&exchangeratesapi.Scanner{},
 		&exportsdk.Scanner{},
@@ -1150,6 +1158,7 @@ func buildDetectorList() []detectors.Detector {
 		&financialmodelingprep.Scanner{},
 		&findl.Scanner{},
 		&finnhub.Scanner{},
+		&firecrawl.Scanner{},
 		&fixerio.Scanner{},
 		&flatio.Scanner{},
 		&fleetbase.Scanner{},
@@ -1399,6 +1408,7 @@ func buildDetectorList() []detectors.Detector {
 		&oopspam.Scanner{},
 		&openai.Scanner{},
 		&opencagedata.Scanner{},
+		&openrouter.Scanner{},
 		&openuv.Scanner{},
 		&openvpn.Scanner{},
 		&openweather.Scanner{},
@@ -1428,6 +1438,7 @@ func buildDetectorList() []detectors.Detector {
 		&peopledatalabs.Scanner{},
 		&pepipost.Scanner{},
 		&percy.Scanner{},
+		&perplexity.Scanner{},
 		&photoroom.Scanner{},
 		&phraseaccesstoken.Scanner{},
 		&pinata.Scanner{},
@@ -1506,6 +1517,7 @@ func buildDetectorList() []detectors.Detector {
 		&rownd.Scanner{},
 		&rubygems.Scanner{},
 		&runrunit.Scanner{},
+		&runwayml.Scanner{},
 		&saladcloudapikey.Scanner{},
 		&salesblink.Scanner{},
 		&salescookie.Scanner{},

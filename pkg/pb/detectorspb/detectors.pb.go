@@ -1146,6 +1146,12 @@ const (
 	DetectorType_PhraseAccessToken                       DetectorType = 1037
 	DetectorType_Photoroom                               DetectorType = 1038
 	DetectorType_JWT                                     DetectorType = 1039
+	DetectorType_Perplexity                              DetectorType = 1040
+	DetectorType_ElevenLabs                              DetectorType = 1041
+	DetectorType_OpenRouter                              DetectorType = 1042
+	DetectorType_RunwayML                                DetectorType = 1043
+	DetectorType_Firecrawl                               DetectorType = 1044
+	DetectorType_Exa                                     DetectorType = 1045
 )
 
 // Enum value maps for DetectorType.
@@ -2187,6 +2193,12 @@ var (
 		1037: "PhraseAccessToken",
 		1038: "Photoroom",
 		1039: "JWT",
+		1040: "Perplexity",
+		1041: "ElevenLabs",
+		1042: "OpenRouter",
+		1043: "RunwayML",
+		1044: "Firecrawl",
+		1045: "Exa",
 	}
 	DetectorType_value = map[string]int32{
 		"Alibaba":                               0,
@@ -3225,6 +3237,12 @@ var (
 		"PhraseAccessToken":                 1037,
 		"Photoroom":                         1038,
 		"JWT":                               1039,
+		"Perplexity":                        1040,
+		"ElevenLabs":                        1041,
+		"OpenRouter":                        1042,
+		"RunwayML":                          1043,
+		"Firecrawl":                         1044,
+		"Exa":                               1045,
 	}
 )
 
