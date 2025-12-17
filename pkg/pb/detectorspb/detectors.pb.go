@@ -1147,6 +1147,7 @@ const (
 	DetectorType_Photoroom                               DetectorType = 1038
 	DetectorType_JWT                                     DetectorType = 1039
 	DetectorType_Perplexity                              DetectorType = 1040
+	DetectorType_ElevenLabs                              DetectorType = 1041
 	DetectorType_OpenRouter                              DetectorType = 1042
 	DetectorType_RunwayML                                DetectorType = 1043
 	DetectorType_Firecrawl                               DetectorType = 1044

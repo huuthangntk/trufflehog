@@ -1,7 +1,7 @@
 package api
 
 import (
-	"context"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors"
+	thogctx "github.com/trufflesecurity/trufflehog/v3/pkg/context"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/decoders"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/engine"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/pb/source_metadatapb"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/sources"
-	"github.com/trufflesecurity/trufflehog/v3/pkg/sources/git"
 )
 
 type ScanRequest struct {
@@ -30,16 +31,16 @@ type ScanResponse struct {
 }
 
 type ScanResult struct {
-	ScanID       string              `json:"scan_id"`
-	Status       string              `json:"status"`
-	RepoURL      string              `json:"repo_url"`
-	StartedAt    string              `json:"started_at"`
-	CompletedAt  string              `json:"completed_at,omitempty"`
-	TotalSecrets int                 `json:"total_secrets"`
-	Verified     int                 `json:"verified"`
-	Unverified   int                 `json:"unverified"`
-	Secrets      []SecretResult      `json:"secrets,omitempty"`
-	Error        string              `json:"error,omitempty"`
+	ScanID       string         `json:"scan_id"`
+	Status       string         `json:"status"`
+	RepoURL      string         `json:"repo_url"`
+	StartedAt    string         `json:"started_at"`
+	CompletedAt  string         `json:"completed_at,omitempty"`
+	TotalSecrets int            `json:"total_secrets"`
+	Verified     int            `json:"verified"`
+	Unverified   int            `json:"unverified"`
+	Secrets      []SecretResult `json:"secrets,omitempty"`
+	Error        string         `json:"error,omitempty"`
 }
 
 type SecretResult struct {
@@ -67,9 +68,25 @@ type Server struct {
 }
 
 func NewServer() (*Server, error) {
-	e, err := engine.Start(context.Background())
+	ctx := thogctx.Background()
+
+	// Create a source manager with default options
+	sourceManager := sources.NewManager()
+	if sourceManager == nil {
+		return nil, fmt.Errorf("failed to create source manager")
+	}
+
+	conf := engine.Config{
+		Concurrency:   1,
+		Decoders:      decoders.DefaultDecoders(),
+		Detectors:     nil, // Will be set per scan
+		Verify:        true,
+		SourceManager: sourceManager,
+	}
+
+	e, err := engine.NewEngine(ctx, &conf)
 	if err != nil {
-		return nil, fmt.Errorf("failed to start engine: %w", err)
+		return nil, fmt.Errorf("failed to create engine: %w", err)
 	}
 
 	return &Server{
@@ -175,57 +192,52 @@ func (s *Server) performScan(scanID string, req ScanRequest) {
 	scanResult.Status = "running"
 	s.scansMutex.Unlock()
 
-	ctx := context.Background()
-	
-	gitSource := &git.Source{}
-	conn, err := gitSource.Init(ctx, "trufflehog-api", 0, 0, req.Verify)
-	if err != nil {
-		s.updateScanError(scanID, fmt.Sprintf("Failed to initialize git source: %v", err))
-		s.sendWebhook(req.WebhookURL, scanID)
-		return
+	ctx := thogctx.Background()
+
+	// Start the engine
+	s.engine.Start(ctx)
+	defer s.engine.Finish(ctx)
+
+	// Configure git scan
+	gitCfg := sources.GitConfig{
+		URI: req.RepoURL,
 	}
 
-	if err := conn.SetSourceUnit(ctx, sources.SourceUnit{
-		ID:   scanID,
-		Kind: "git",
-	}); err != nil {
-		s.updateScanError(scanID, fmt.Sprintf("Failed to set source unit: %v", err))
+	// Perform the scan
+	if _, err := s.engine.ScanGit(ctx, gitCfg); err != nil {
+		s.updateScanError(scanID, fmt.Sprintf("Failed to scan repository: %v", err))
 		s.sendWebhook(req.WebhookURL, scanID)
 		return
 	}
 
 	var secrets []SecretResult
-	resultsChan := make(chan detectors.Result, 100)
-	
-	go func() {
-		for result := range resultsChan {
-			secret := SecretResult{
-				DetectorType: result.DetectorType.String(),
-				DetectorName: result.DetectorName,
-				Verified:     result.Verified,
-				Redacted:     result.Redacted,
-				ExtraData:    result.ExtraData,
-			}
-			
-			if result.SourceMetadata != nil {
-				secret.SourceName = result.SourceMetadata.GetData().GetGit().GetRepository()
+
+	// Collect results
+	for result := range s.engine.ResultsChan() {
+		secret := SecretResult{
+			DetectorType: result.DetectorType.String(),
+			DetectorName: result.DetectorName,
+			Verified:     result.Verified,
+			Redacted:     result.Redacted,
+			ExtraData:    result.ExtraData,
+		}
+
+		if result.SourceMetadata != nil {
+			if gitMeta := result.SourceMetadata.GetData().(*source_metadatapb.MetaData_Git); gitMeta != nil {
+				secret.SourceName = gitMeta.Git.GetRepository()
 				secret.SourceType = "git"
 			}
-			
-			secrets = append(secrets, secret)
 		}
-	}()
 
-	// Note: This is a simplified version. In production, you'd integrate with the actual engine
-	// and properly handle the scanning process
-	close(resultsChan)
+		secrets = append(secrets, secret)
+	}
 
 	s.scansMutex.Lock()
 	scanResult.Status = "completed"
 	scanResult.CompletedAt = time.Now().UTC().Format(time.RFC3339)
 	scanResult.Secrets = secrets
 	scanResult.TotalSecrets = len(secrets)
-	
+
 	for _, secret := range secrets {
 		if secret.Verified {
 			scanResult.Verified++
@@ -241,7 +253,7 @@ func (s *Server) performScan(scanID string, req ScanRequest) {
 func (s *Server) updateScanError(scanID, errorMsg string) {
 	s.scansMutex.Lock()
 	defer s.scansMutex.Unlock()
-	
+
 	if scanResult, exists := s.scans[scanID]; exists {
 		scanResult.Status = "failed"
 		scanResult.Error = errorMsg
@@ -269,7 +281,7 @@ func (s *Server) sendWebhook(webhookURL, scanID string) {
 		return
 	}
 
-	req, err := http.NewRequest(http.MethodPost, webhookURL, nil)
+	req, err := http.NewRequest(http.MethodPost, webhookURL, bytes.NewReader(jsonData))
 	if err != nil {
 		return
 	}
@@ -277,7 +289,7 @@ func (s *Server) sendWebhook(webhookURL, scanID string) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "TruffleHog-API/1.0")
 	req.Header.Set("X-TruffleHog-Event", "scan.completed")
-	
+
 	resp, err := s.webhookClient.Do(req)
 	if err != nil {
 		return
@@ -287,7 +299,7 @@ func (s *Server) sendWebhook(webhookURL, scanID string) {
 
 func (s *Server) Start(addr string) error {
 	mux := http.NewServeMux()
-	
+
 	mux.HandleFunc("/api/v1/scan", s.HandleScan)
 	mux.HandleFunc("/api/v1/scan/status", s.HandleGetScan)
 	mux.HandleFunc("/api/v1/scans", s.HandleListScans)
