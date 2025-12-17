@@ -5,8 +5,17 @@ dist
 
 # binary
 trufflehog
+trufflehog-api
 tmp/go-test.json
 .captain/detectors/timings.yaml
 .captain/detectors/quarantines.yaml
 .captain/detectors/flakes.yaml
 .vscode
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+build/
+dist/
