@@ -7,10 +7,11 @@
 package detectorspb
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -1100,7 +1101,6 @@ const (
 	DetectorType_LarkSuite                               DetectorType = 991
 	DetectorType_LarkSuiteApiKey                         DetectorType = 992
 	DetectorType_EndorLabs                               DetectorType = 993
-	DetectorType_ElevenLabs                              DetectorType = 994
 	DetectorType_Netsuite                                DetectorType = 995
 	DetectorType_RobinhoodCrypto                         DetectorType = 996
 	DetectorType_NVAPI                                   DetectorType = 997
@@ -1147,7 +1147,6 @@ const (
 	DetectorType_Photoroom                               DetectorType = 1038
 	DetectorType_JWT                                     DetectorType = 1039
 	DetectorType_Perplexity                              DetectorType = 1040
-	DetectorType_ElevenLabs                              DetectorType = 1041
 	DetectorType_OpenRouter                              DetectorType = 1042
 	DetectorType_RunwayML                                DetectorType = 1043
 	DetectorType_Firecrawl                               DetectorType = 1044
@@ -2147,7 +2146,6 @@ var (
 		991:  "LarkSuite",
 		992:  "LarkSuiteApiKey",
 		993:  "EndorLabs",
-		994:  "ElevenLabs",
 		995:  "Netsuite",
 		996:  "RobinhoodCrypto",
 		997:  "NVAPI",
@@ -3191,7 +3189,6 @@ var (
 		"LarkSuite":                         991,
 		"LarkSuiteApiKey":                   992,
 		"EndorLabs":                         993,
-		"ElevenLabs":                        994,
 		"Netsuite":                          995,
 		"RobinhoodCrypto":                   996,
 		"NVAPI":                             997,
